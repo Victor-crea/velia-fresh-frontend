@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/ProductCard";
-import { categories, products, Category } from "@/data/mockData";
+import { categories, Category } from "@/data/mockData";
+import { useProducts } from "@/hooks/useProducts";
 import { Input } from "@/components/ui/input";
-import { Search, PackageOpen } from "lucide-react";
+import { Search, PackageOpen, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Catalog = () => {
   const [active, setActive] = useState<Category | "Todos">("Todos");
   const [query, setQuery] = useState("");
+  const { products, loading, error } = useProducts();
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -17,7 +19,7 @@ const Catalog = () => {
         p.description.toLowerCase().includes(query.toLowerCase());
       return matchCat && matchQuery;
     });
-  }, [active, query]);
+  }, [active, query, products]);
 
   return (
     <Layout>
@@ -60,7 +62,14 @@ const Catalog = () => {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-24 grid place-items-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
+        ) : error ? (
+          <div className="py-24 text-center">
+            <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-3" />
+            <p className="text-muted-foreground">{error}</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-24 text-center">
             <PackageOpen className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
             <h3 className="font-display text-2xl font-semibold">Sin resultados</h3>

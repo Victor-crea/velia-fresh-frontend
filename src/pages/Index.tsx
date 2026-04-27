@@ -1,9 +1,9 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Award, Truck, Leaf, Clock } from "lucide-react";
+import { ArrowRight, Award, Truck, Leaf, Clock, Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
-import { products } from "@/data/mockData";
+import { useProducts } from "@/hooks/useProducts";
 import heroImg from "@/assets/hero-meat.jpg";
 
 const features = [
@@ -14,11 +14,11 @@ const features = [
 ];
 
 const Index = () => {
-  const featured = products.filter((p) => p.featured);
+  const { products, loading } = useProducts();
+  const featured = products.filter((p) => p.featured).slice(0, 4);
 
   return (
     <Layout>
-      {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroImg} alt="" width={1920} height={1080} className="h-full w-full object-cover" />
@@ -50,9 +50,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PROMO STRIP */}
       <section className="bg-primary text-primary-foreground py-3 overflow-hidden">
-        <div className="flex gap-12 animate-shimmer whitespace-nowrap text-sm font-medium tracking-wide" style={{ backgroundImage: "linear-gradient(90deg, transparent, hsl(var(--primary-glow)/0.2), transparent)", backgroundSize: "200% 100%" }}>
+        <div className="flex gap-12 whitespace-nowrap text-sm font-medium tracking-wide">
           <div className="container flex justify-around">
             <span>🔥 Envío gratis en compras +$1,500</span>
             <span className="hidden md:inline">⭐ 15% off en tu primera compra</span>
@@ -61,7 +60,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="container py-20">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
@@ -76,7 +74,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* FEATURED PRODUCTS */}
       <section className="bg-gradient-warm py-20">
         <div className="container">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
@@ -88,13 +85,16 @@ const Index = () => {
               <Button variant="outline">Ver todo el catálogo <ArrowRight className="h-4 w-4" /></Button>
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
+          {loading ? (
+            <div className="grid place-items-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* CTA */}
       <section className="container py-24">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-dark p-10 md:p-16 text-charcoal-foreground shadow-elegant">
           <div className="relative z-10 max-w-2xl">
