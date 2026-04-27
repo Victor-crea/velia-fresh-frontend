@@ -3,6 +3,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { getProductImage } from "@/lib/productImages";
 
 const Cart = () => {
   const { items, updateQty, removeItem, subtotal, clear } = useCart();
@@ -43,7 +44,7 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {items.map(({ product, quantity }) => (
               <div key={product.id} className="flex gap-4 p-4 bg-card rounded-xl border border-border/60 shadow-soft animate-fade-in">
-                <img src={product.image} alt={product.name} loading="lazy" className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover" />
+                <img src={getProductImage(product.name, product.image)} alt={product.name} loading="lazy" className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover" />
                 <div className="flex-1 flex flex-col">
                   <div className="flex justify-between gap-2">
                     <div>

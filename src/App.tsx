@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Catalog from "./pages/Catalog.tsx";
 import Cart from "./pages/Cart.tsx";
@@ -18,23 +20,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/catalogo" element={<Catalog />} />
-            <Route path="/carrito" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/login" element={<Auth />} />
-            <Route path="/registro" element={<Auth />} />
-            <Route path="/perfil" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/catalogo" element={<Catalog />} />
+              <Route path="/carrito" element={<Cart />} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/login" element={<Auth />} />
+              <Route path="/registro" element={<Auth />} />
+              <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -1,22 +1,25 @@
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, User, Menu, X, Beef } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingCart, User, Menu, X, Beef, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { to: "/", label: "Inicio" },
-  { to: "/catalogo", label: "Catálogo" },
-  { to: "/perfil", label: "Mi cuenta" },
-  { to: "/admin", label: "Admin" },
-];
-
 export const Navbar = () => {
   const { totalItems } = useCart();
+  const { user, role, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const navItems = [
+    { to: "/", label: "Inicio" },
+    { to: "/catalogo", label: "Catálogo" },
+    ...(user ? [{ to: "/perfil", label: "Mi cuenta" }] : []),
+    ...(role === "admin" ? [{ to: "/admin", label: "Admin" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-lg">
@@ -41,18 +44,25 @@ export const Navbar = () => {
                 pathname === item.to ? "text-primary" : "text-foreground/70"
               )}
             >
-              {item.label}
+              {item.label === "Admin" ? <span className="inline-flex items-center gap-1"><Shield className="h-3 w-3" /> {item.label}</span> : item.label}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link to="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm">
-              <User className="h-4 w-4" />
-              <span className="hidden lg:inline">Ingresar</span>
+          {user ? (
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={async () => { await signOut(); navigate("/"); }}>
+              <LogOut className="h-4 w-4" />
+              <span className="hidden lg:inline">Salir</span>
             </Button>
-          </Link>
+          ) : (
+            <Link to="/login" className="hidden sm:block">
+              <Button variant="ghost" size="sm">
+                <User className="h-4 w-4" />
+                <span className="hidden lg:inline">Ingresar</span>
+              </Button>
+            </Link>
+          )}
           <Link to="/carrito">
             <Button variant="default" size="sm" className="relative">
               <ShoppingCart className="h-4 w-4" />
@@ -92,9 +102,15 @@ export const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            <Link to="/login" onClick={() => setOpen(false)} className="px-3 py-3 text-sm font-medium text-foreground/80">
-              Ingresar / Registrarse
-            </Link>
+            {user ? (
+              <button onClick={async () => { setOpen(false); await signOut(); navigate("/"); }} className="text-left px-3 py-3 text-sm font-medium text-foreground/80">
+                Cerrar sesión
+              </button>
+            ) : (
+              <Link to="/login" onClick={() => setOpen(false)} className="px-3 py-3 text-sm font-medium text-foreground/80">
+                Ingresar / Registrarse
+              </Link>
+            )}
           </nav>
         </div>
       )}

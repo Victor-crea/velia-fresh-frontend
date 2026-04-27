@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,20 +7,68 @@ import { Link, useNavigate } from "react-router-dom";
 import { Beef, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Email inválido").max(255),
+  password: z.string().min(6, "Mínimo 6 caracteres").max(100),
+});
+const registerSchema = loginSchema.extend({
+  fullName: z.string().trim().min(2, "Nombre muy corto").max(100),
+});
 
 const Auth = () => {
   const [tab, setTab] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const navigate = useNavigate();
+  const { user, role, loading: authLoading } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(role === "admin" ? "/admin" : "/perfil", { replace: true });
+    }
+  }, [user, role, authLoading, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
+      if (tab === "login") {
+        const parsed = loginSchema.safeParse({ email, password });
+        if (!parsed.success) {
+          toast.error(parsed.error.errors[0].message);
+          return;
+        }
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("¡Bienvenido de vuelta!");
+      } else {
+        const parsed = registerSchema.safeParse({ email, password, fullName });
+        if (!parsed.success) {
+          toast.error(parsed.error.errors[0].message);
+          return;
+        }
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: fullName },
+          },
+        });
+        if (error) throw error;
+        toast.success("¡Cuenta creada!");
+      }
+    } catch (err: any) {
+      toast.error(err.message ?? "Error de autenticación");
+    } finally {
       setLoading(false);
-      toast.success(tab === "login" ? "¡Bienvenida de vuelta!" : "¡Cuenta creada!");
-      navigate("/perfil");
-    }, 1200);
+    }
   };
 
   return (
@@ -59,22 +107,17 @@ const Auth = () => {
             {tab === "register" && (
               <div>
                 <Label>Nombre completo</Label>
-                <Input required placeholder="María García" className="mt-1.5" />
+                <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="María García" className="mt-1.5" />
               </div>
             )}
             <div>
               <Label>Email</Label>
-              <Input required type="email" placeholder="tu@email.com" className="mt-1.5" />
+              <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" className="mt-1.5" />
             </div>
             <div>
               <Label>Contraseña</Label>
-              <Input required type="password" placeholder="••••••••" className="mt-1.5" />
+              <Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1.5" />
             </div>
-            {tab === "login" && (
-              <div className="text-right">
-                <a href="#" className="text-xs text-primary hover:underline">¿Olvidaste tu contraseña?</a>
-              </div>
-            )}
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Procesando...</> : (tab === "login" ? "Ingresar" : "Crear cuenta")}
             </Button>

@@ -3,14 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { ShoppingCart } from "lucide-react";
+import { getProductImage } from "@/lib/productImages";
 
 export const ProductCard = ({ product }: { product: Product }) => {
   const { addItem } = useCart();
+  const img = getProductImage(product.name, product.image);
+  const outOfStock = product.stock <= 0;
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-soft hover:shadow-elegant transition-smooth border border-border/50">
       <div className="relative aspect-square overflow-hidden bg-secondary">
         <img
-          src={product.image}
+          src={img}
           alt={product.name}
           loading="lazy"
           width={800}
@@ -34,9 +37,9 @@ export const ProductCard = ({ product }: { product: Product }) => {
             <span className="font-display text-2xl font-bold text-primary">${product.price}</span>
             <span className="text-sm text-muted-foreground">/{product.unit}</span>
           </div>
-          <Button size="sm" onClick={() => addItem(product)}>
+          <Button size="sm" onClick={() => addItem(product)} disabled={outOfStock}>
             <ShoppingCart className="h-4 w-4" />
-            Agregar
+            {outOfStock ? "Agotado" : "Agregar"}
           </Button>
         </div>
       </div>

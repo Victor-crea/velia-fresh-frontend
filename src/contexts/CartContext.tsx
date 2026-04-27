@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Product } from "@/data/mockData";
 import { toast } from "sonner";
 
 export interface CartItem {
   product: Product;
-  quantity: number; // en kg, paso 0.25
+  quantity: number;
 }
 
 interface CartContextType {
@@ -18,9 +18,19 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+const STORAGE_KEY = "evelia_cart";
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   const addItem = (product: Product, qty = 0.5) => {
     setItems((curr) => {

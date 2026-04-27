@@ -1,45 +1,86 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle2, CreditCard, Truck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Checkout = () => {
   const { items, subtotal, clear } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [shipping, setShipping] = useState({ full_name: "", phone: "", address: "" });
   const navigate = useNavigate();
-  const shipping = subtotal > 1500 ? 0 : 99;
-  const total = subtotal + shipping;
+  const shippingCost = subtotal > 1500 ? 0 : 99;
+  const total = subtotal + shippingCost;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("full_name, phone, address").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setShipping({ full_name: data.full_name ?? "", phone: data.phone ?? "", address: data.address ?? "" }); });
+  }, [user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setDone(true);
+    try {
+      const { data: order, error } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          total,
+          shipping_address: `${shipping.full_name} · ${shipping.phone} · ${shipping.address}`,
+          status: "pendiente",
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+
+      const itemsPayload = items.map((i) => ({
+        order_id: order.id,
+        product_id: i.product.id,
+        product_name: i.product.name,
+        quantity: i.quantity,
+        price: i.product.price,
+      }));
+      const { error: itErr } = await supabase.from("order_items").insert(itemsPayload);
+      if (itErr) throw itErr;
+
+      // Update profile if changed
+      await supabase.from("profiles").update({
+        full_name: shipping.full_name, phone: shipping.phone, address: shipping.address,
+      }).eq("user_id", user.id);
+
       clear();
-      toast.success("¡Pedido confirmado!", { description: "Recibirás un correo con los detalles." });
-    }, 1800);
+      setDone(order.id);
+      toast.success("¡Pedido confirmado!");
+    } catch (err: any) {
+      toast.error(err.message ?? "Error al crear pedido");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (done) {
     return (
       <Layout>
-        <div className="container py-24 text-center max-w-lg animate-scale-in">
+        <div className="container py-24 text-center max-w-lg animate-scale-in mx-auto">
           <div className="mx-auto h-20 w-20 rounded-full bg-primary/10 grid place-items-center mb-6">
             <CheckCircle2 className="h-10 w-10 text-primary" />
           </div>
           <h1 className="font-display text-4xl font-bold">¡Gracias por tu compra!</h1>
           <p className="mt-3 text-muted-foreground">
-            Tu pedido <span className="font-mono text-primary">EVE-{Math.floor(1000 + Math.random() * 9000)}</span> está siendo preparado.
+            Tu pedido <span className="font-mono text-primary">#{done.slice(0, 8).toUpperCase()}</span> está siendo preparado.
           </p>
           <div className="mt-8 flex gap-3 justify-center">
-            <Button onClick={() => navigate("/perfil")} variant="hero">Ver mi pedido</Button>
+            <Button onClick={() => navigate("/perfil")} variant="hero">Ver mis pedidos</Button>
             <Button onClick={() => navigate("/")} variant="outline">Volver al inicio</Button>
           </div>
         </div>
@@ -74,12 +115,10 @@ const Checkout = () => {
                 <h2 className="font-display text-xl font-bold">Datos de envío</h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2"><Label>Nombre completo</Label><Input required placeholder="María García" className="mt-1.5" /></div>
-                <div><Label>Email</Label><Input required type="email" placeholder="tu@email.com" className="mt-1.5" /></div>
-                <div><Label>Teléfono</Label><Input required placeholder="55 1234 5678" className="mt-1.5" /></div>
-                <div className="sm:col-span-2"><Label>Dirección</Label><Input required placeholder="Calle, número, colonia" className="mt-1.5" /></div>
-                <div><Label>Ciudad</Label><Input required placeholder="CDMX" className="mt-1.5" /></div>
-                <div><Label>Código postal</Label><Input required placeholder="03100" className="mt-1.5" /></div>
+                <div className="sm:col-span-2"><Label>Nombre completo</Label><Input required value={shipping.full_name} onChange={(e) => setShipping({ ...shipping, full_name: e.target.value })} className="mt-1.5" /></div>
+                <div><Label>Teléfono</Label><Input required value={shipping.phone} onChange={(e) => setShipping({ ...shipping, phone: e.target.value })} className="mt-1.5" /></div>
+                <div><Label>Email</Label><Input value={user?.email ?? ""} disabled className="mt-1.5" /></div>
+                <div className="sm:col-span-2"><Label>Dirección completa</Label><Input required value={shipping.address} onChange={(e) => setShipping({ ...shipping, address: e.target.value })} placeholder="Calle, número, colonia, ciudad" className="mt-1.5" /></div>
               </div>
             </div>
 
@@ -89,9 +128,9 @@ const Checkout = () => {
                 <h2 className="font-display text-xl font-bold">Pago</h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2"><Label>Número de tarjeta</Label><Input required placeholder="4242 4242 4242 4242" className="mt-1.5" /></div>
-                <div><Label>Vencimiento</Label><Input required placeholder="MM/AA" className="mt-1.5" /></div>
-                <div><Label>CVV</Label><Input required placeholder="123" className="mt-1.5" /></div>
+                <div className="sm:col-span-2"><Label>Número de tarjeta</Label><Input placeholder="4242 4242 4242 4242" className="mt-1.5" /></div>
+                <div><Label>Vencimiento</Label><Input placeholder="MM/AA" className="mt-1.5" /></div>
+                <div><Label>CVV</Label><Input placeholder="123" className="mt-1.5" /></div>
               </div>
               <p className="text-xs text-muted-foreground mt-4">🔒 Pago simulado. No se procesa ningún cargo real.</p>
             </div>
@@ -113,7 +152,7 @@ const Checkout = () => {
               <div className="border-t border-border my-4" />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">${subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Envío</span><span className="tabular-nums">{shipping === 0 ? "Gratis" : `$${shipping}`}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Envío</span><span className="tabular-nums">{shippingCost === 0 ? "Gratis" : `$${shippingCost}`}</span></div>
                 <div className="border-t border-border pt-2 flex justify-between text-lg"><span className="font-semibold">Total</span><span className="font-display font-bold text-primary tabular-nums">${total.toFixed(2)}</span></div>
               </div>
               <Button type="submit" disabled={loading} variant="hero" size="lg" className="w-full mt-6">
