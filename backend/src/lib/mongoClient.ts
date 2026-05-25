@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import dns from "dns";
 
 dotenv.config();
+
+dns.setServers(['8.8.8.8']);
 
 let connected = false;
 
@@ -16,6 +19,7 @@ export async function connectMongo(): Promise<typeof mongoose> {
 
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 10000,
+    tls: true,
   });
   connected = true;
   console.log("✅ MongoDB conectado");
