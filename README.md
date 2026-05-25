@@ -32,8 +32,8 @@
 
 | Rol | Email | Contraseña | Acceso |
 |---|---|---|---|
-| **Admin** | admin@evelia.com | (la que registraste) | Panel `/admin`, todos los endpoints |
-| **Cliente** | cliente@evelia.com | (la que registraste) | Checkout, perfil, historial |
+| **Admin** | victormarquezmares.30@gmail.com | Carniceria123* | Panel `/admin`, todos los endpoints |
+| **Cliente** | cliente@evelia.com | Carniceria123* | Checkout, perfil, historial |
 | **Anónimo** | — | — | Catálogo, carrito (localStorage) |
 
 > Para crear un admin: regístrate normalmente y luego en Supabase → SQL Editor ejecuta:
