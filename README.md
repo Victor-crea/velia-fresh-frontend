@@ -24,7 +24,7 @@
 
 | Entorno | URL |
 |---|---|
-| Frontend | `https://<tu-proyecto>.lovable.app` |
+| Frontend | `https://carniceriaevelia.netlify.app/` |
 | Backend local | `http://localhost:4000` |
 | Supabase dashboard | `https://supabase.com/dashboard/project/zicxfphkrcvoxnvkqosv` |
 
@@ -32,8 +32,8 @@
 
 | Rol | Email | Contraseña | Acceso |
 |---|---|---|---|
-| **Admin** | victormarquezmares.30@gmail.com | Carniceria123* | Panel `/admin`, todos los endpoints |
-| **Cliente** | cliente@evelia.com | Carniceria123* | Checkout, perfil, historial |
+| **Admin** | victormarquezmares.30@gmail.com | puchongon1A* | Panel `/admin`, todos los endpoints |
+| **Cliente** | solis@gmail.com | Carniceria123* | Checkout, perfil, historial |
 | **Anónimo** | — | — | Catálogo, carrito (localStorage) |
 
 > Para crear un admin: regístrate normalmente y luego en Supabase → SQL Editor ejecuta:
