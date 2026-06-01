@@ -48,6 +48,10 @@ const Profile = () => {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (profile.phone && !/^\d{10}$/.test(profile.phone)) {
+      toast.error("El teléfono debe tener exactamente 10 dígitos");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("profiles").update({
       full_name: profile.full_name, phone: profile.phone, address: profile.address,
