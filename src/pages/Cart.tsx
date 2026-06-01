@@ -56,16 +56,14 @@ const Cart = () => {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="mt-auto flex items-center justify-between pt-3">
-                    <div className="inline-flex items-center bg-secondary rounded-full">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={() => updateQty(product.id, quantity - 0.25)}>
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="px-3 text-sm font-semibold tabular-nums w-16 text-center">{quantity} kg</span>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={() => updateQty(product.id, quantity + 0.25)}>
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
+                  <div className="mt-auto flex items-center justify-between pt-3 gap-2 flex-wrap">
+                    <CartItemQuantity
+                      quantityKg={quantity}
+                      pricePerKg={product.price}
+                      stockKg={product.stock ?? 0}
+                      unitLabel={product.unit}
+                      onChange={(kg) => updateQty(product.id, kg)}
+                    />
                     <span className="font-display text-xl font-bold text-primary">
                       ${(quantity * product.price).toFixed(2)}
                     </span>
