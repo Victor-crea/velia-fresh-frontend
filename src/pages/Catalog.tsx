@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/ProductCard";
 import { categories, Category } from "@/data/mockData";
@@ -7,19 +7,31 @@ import { Input } from "@/components/ui/input";
 import { Search, PackageOpen, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const normalize = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const Catalog = () => {
   const [active, setActive] = useState<Category | "Todos">("Todos");
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const { products, loading, error } = useProducts();
 
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(id);
+  }, [query]);
+
   const filtered = useMemo(() => {
+    const term = debouncedQuery.trim();
+    const words = term ? normalize(term).split(/\s+/).filter(Boolean) : [];
     return products.filter((p) => {
       const matchCat = active === "Todos" || p.category === active;
-      const matchQuery = p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.description.toLowerCase().includes(query.toLowerCase());
-      return matchCat && matchQuery;
+      if (!matchCat) return false;
+      if (words.length === 0) return true;
+      const haystack = normalize(`${p.name} ${p.description}`);
+      return words.every((w) => haystack.includes(w));
     });
-  }, [active, query, products]);
+  }, [active, debouncedQuery, products]);
 
   return (
     <Layout>

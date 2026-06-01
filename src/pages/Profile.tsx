@@ -48,6 +48,10 @@ const Profile = () => {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (profile.phone && !/^\d{10}$/.test(profile.phone)) {
+      toast.error("El teléfono debe tener exactamente 10 dígitos");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("profiles").update({
       full_name: profile.full_name, phone: profile.phone, address: profile.address,
@@ -95,7 +99,7 @@ const Profile = () => {
             </div>
             <div>
               <Label className="text-xs flex items-center gap-1.5"><Phone className="h-3 w-3" /> Teléfono</Label>
-              <Input className="mt-1" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
+              <Input className="mt-1" type="tel" inputMode="numeric" maxLength={10} value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
             </div>
             <div>
               <Label className="text-xs flex items-center gap-1.5"><MapPin className="h-3 w-3" /> Dirección</Label>

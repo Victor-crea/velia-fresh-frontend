@@ -33,18 +33,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [items]);
 
   const addItem = (product: Product, qty = 0.5) => {
+    let blocked = false;
     setItems((curr) => {
       const existing = curr.find((i) => i.product.id === product.id);
+      const currentQty = existing?.quantity ?? 0;
+      const maxStock = product.stock ?? 0;
+      if (maxStock <= 0) {
+        blocked = true;
+        toast.error(`${product.name} está agotado`);
+        return curr;
+      }
+      const newQty = +(currentQty + qty).toFixed(2);
+      if (newQty > maxStock) {
+        blocked = true;
+        toast.error(`Stock máximo disponible: ${maxStock} ${product.unit}`);
+        return curr;
+      }
       if (existing) {
         return curr.map((i) =>
-          i.product.id === product.id ? { ...i, quantity: +(i.quantity + qty).toFixed(2) } : i
+          i.product.id === product.id ? { ...i, quantity: newQty } : i
         );
       }
       return [...curr, { product, quantity: qty }];
     });
-    toast.success(`${product.name} agregado al carrito`, {
-      description: `${qty} ${product.unit}`,
-    });
+    if (!blocked) {
+      toast.success(`${product.name} agregado al carrito`, {
+        description: `${qty} ${product.unit}`,
+      });
+    }
   };
 
   const removeItem = (id: string) => {
@@ -54,7 +70,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const updateQty = (id: string, qty: number) => {
     if (qty <= 0) return removeItem(id);
     setItems((curr) =>
-      curr.map((i) => (i.product.id === id ? { ...i, quantity: +qty.toFixed(2) } : i))
+      curr.map((i) => {
+        if (i.product.id !== id) return i;
+        const max = i.product.stock ?? 0;
+        if (qty > max) {
+          toast.error(`Stock máximo disponible: ${max} ${i.product.unit}`);
+          return { ...i, quantity: +max.toFixed(2) };
+        }
+        return { ...i, quantity: +qty.toFixed(2) };
+      })
     );
   };
 
