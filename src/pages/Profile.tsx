@@ -99,7 +99,7 @@ const Profile = () => {
             </div>
             <div>
               <Label className="text-xs flex items-center gap-1.5"><Phone className="h-3 w-3" /> Teléfono</Label>
-              <Input className="mt-1" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
+              <Input className="mt-1" type="tel" inputMode="numeric" maxLength={10} value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
             </div>
             <div>
               <Label className="text-xs flex items-center gap-1.5"><MapPin className="h-3 w-3" /> Dirección</Label>
