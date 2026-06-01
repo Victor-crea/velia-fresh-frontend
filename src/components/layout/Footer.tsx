@@ -1,7 +1,10 @@
 import { Beef, Mail, MapPin, Phone, Instagram, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-export const Footer = () => (
+export const Footer = () => {
+  const { role } = useAuth();
+  return (
   <footer className="bg-charcoal text-charcoal-foreground mt-20">
     <div className="container py-14 grid gap-10 md:grid-cols-4">
       <div className="md:col-span-2">
