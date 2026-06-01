@@ -2,7 +2,8 @@ import { Layout } from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { CartItemQuantity } from "@/components/CartItemQuantity";
 import { getProductImage } from "@/lib/productImages";
 
 const Cart = () => {
