@@ -32,7 +32,9 @@ export const Footer = () => (
           <li><Link to="/catalogo" className="hover:text-primary-glow transition-smooth">Catálogo</Link></li>
           <li><Link to="/carrito" className="hover:text-primary-glow transition-smooth">Carrito</Link></li>
           <li><Link to="/perfil" className="hover:text-primary-glow transition-smooth">Mi cuenta</Link></li>
-          <li><Link to="/admin" className="hover:text-primary-glow transition-smooth">Panel admin</Link></li>
+          {role === "admin" && (
+            <li><Link to="/admin" className="hover:text-primary-glow transition-smooth">Panel admin</Link></li>
+          )}
         </ul>
         <div className="flex gap-3 mt-5">
           <a href="#" className="h-9 w-9 grid place-items-center rounded-full bg-charcoal-foreground/10 hover:bg-primary transition-smooth"><Instagram className="h-4 w-4" /></a>
