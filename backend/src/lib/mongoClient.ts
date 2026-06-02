@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import dns from "dns";
+import { logger } from "./logger";
 
 dotenv.config();
 
@@ -15,14 +16,19 @@ let connected = false;
 export async function connectMongo(): Promise<typeof mongoose> {
   if (connected) return mongoose;
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error("Missing MONGODB_URI env var");
+  if (!uri) {
+    logger.error("mongo: MONGODB_URI no definido");
+    throw new Error("Missing MONGODB_URI env var");
+  }
 
-  await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 10000,
-    tls: true,
-  });
-  connected = true;
-  console.log("✅ MongoDB conectado");
+  try {
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000, tls: true });
+    connected = true;
+    logger.info("mongo: conectado");
+  } catch (err) {
+    logger.error("mongo: fallo de conexión", { message: (err as Error)?.message });
+    throw err;
+  }
   return mongoose;
 }
 

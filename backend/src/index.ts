@@ -5,7 +5,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 import { connectMongo } from "./lib/mongoClient";
+import { logger, morganStream } from "./lib/logger";
 import { errorHandler } from "./middlewares/errorHandler";
+import { requestLogger } from "./middlewares/requestLogger";
 
 import authRoutes from "./routes/auth.routes";
 import productsRoutes from "./routes/products.routes";
@@ -26,7 +28,8 @@ const ORIGIN = process.env.CORS_ORIGIN ?? "*";
 app.use(helmet());
 app.use(cors({ origin: ORIGIN, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
-app.use(morgan("dev"));
+app.use(morgan("combined", { stream: morganStream }));
+app.use(requestLogger);
 
 app.get("/health", (_req, res) => res.json({ success: true, data: { status: "ok" } }));
 
@@ -42,15 +45,21 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-app.use((_req, res) => res.status(404).json({ success: false, error: "Ruta no encontrada", code: "NOT_FOUND" }));
+app.use((req, res) => {
+  logger.warn("route not found", { method: req.method, path: req.originalUrl });
+  res.status(404).json({ success: false, error: "Ruta no encontrada", code: "NOT_FOUND" });
+});
 app.use(errorHandler);
+
+process.on("unhandledRejection", (reason) => logger.error("unhandledRejection", { reason: String(reason) }));
+process.on("uncaughtException", (err) => logger.error("uncaughtException", { message: err.message, stack: err.stack }));
 
 async function start() {
   await connectMongo();
-  app.listen(PORT, () => console.log(`🚀 API en http://localhost:${PORT}`));
+  app.listen(PORT, () => logger.info(`🚀 API escuchando en http://localhost:${PORT}`));
 }
 
 start().catch((err) => {
-  console.error("Fallo al iniciar el servidor:", err);
+  logger.error("Fallo al iniciar el servidor", { message: (err as Error)?.message, stack: (err as Error)?.stack });
   process.exit(1);
 });

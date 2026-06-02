@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { AuthedRequest, AppRole, fail } from "../models/types";
+import { logger } from "../lib/logger";
 
 /**
  * Verifica el JWT de Supabase enviado como `Authorization: Bearer <token>`.
@@ -11,15 +12,18 @@ export async function authenticateToken(
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  const reqId = (req as any).reqId;
   const header = req.headers.authorization ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) {
+    logger.warn("auth: token no proporcionado", { reqId, path: req.originalUrl });
     res.status(401).json(fail("Token no proporcionado", "NO_TOKEN"));
     return;
   }
 
   const { data, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !data.user) {
+    logger.warn("auth: token inválido", { reqId, error: error?.message });
     res.status(401).json(fail("Token inválido o expirado", "INVALID_TOKEN"));
     return;
   }
@@ -39,5 +43,6 @@ export async function authenticateToken(
     email: data.user.email ?? "",
     role,
   };
+  logger.debug("auth: usuario autenticado", { reqId, userId: req.user.id, role });
   next();
 }
