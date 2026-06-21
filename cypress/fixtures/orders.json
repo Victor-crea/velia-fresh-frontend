@@ -1,0 +1,28 @@
+{
+  "valid": {
+    "shipping": {
+      "name": "Cliente E2E",
+      "phone": "5512345678",
+      "address": "Av. Siempre Viva 742, Col. Centro, CDMX"
+    },
+    "card": {
+      "name": "Cliente E2E",
+      "number": "4242424242424242",
+      "expiry": "1230",
+      "cvv": "123"
+    }
+  },
+  "invalid": {
+    "shipping": {
+      "name": "",
+      "phone": "123",
+      "address": ""
+    },
+    "card": {
+      "name": "1",
+      "number": "1111",
+      "expiry": "1320",
+      "cvv": "1"
+    }
+  }
+}
