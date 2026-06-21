@@ -28,3 +28,6 @@ dist-ssr
 backend/node_modules/
 backend/dist/
 backend/.env
+cypress/videos
+cypress/screenshots
+cypress/downloads
