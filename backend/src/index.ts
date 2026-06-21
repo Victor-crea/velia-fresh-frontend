@@ -20,6 +20,7 @@ import reviewsRoutes from "./routes/reviews.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import notificationsRoutes from "./routes/notifications.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import testingRoutes from "./routes/testing.routes";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4000);
@@ -44,6 +45,12 @@ app.use("/api/reviews", reviewsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Rutas SOLO de testing E2E — desactivadas en producción.
+if (process.env.ENABLE_TEST_ENDPOINTS === "true") {
+  app.use("/api/testing", testingRoutes);
+  logger.warn("⚠️  Test endpoints habilitados en /api/testing (NO usar en producción)");
+}
 
 app.use((req, res) => {
   logger.warn("route not found", { method: req.method, path: req.originalUrl });
