@@ -129,7 +129,7 @@ const Checkout = () => {
           <div className="mx-auto h-20 w-20 rounded-full bg-primary/10 grid place-items-center mb-6">
             <CheckCircle2 className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="font-display text-4xl font-bold">¡Gracias por tu compra!</h1>
+          <h1 data-testid="checkout-success" className="font-display text-4xl font-bold">¡Gracias por tu compra!</h1>
           <p className="mt-3 text-muted-foreground">
             Tu pedido <span className="font-mono text-primary">#{done.slice(0, 8).toUpperCase()}</span> está siendo preparado.
           </p>
@@ -174,12 +174,13 @@ const Checkout = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <Label>Nombre completo</Label>
-                  <Input value={shipping.full_name} onChange={(e) => setShipping({ ...shipping, full_name: e.target.value })} className="mt-1.5" />
+                  <Input data-testid="checkout-name" value={shipping.full_name} onChange={(e) => setShipping({ ...shipping, full_name: e.target.value })} className="mt-1.5" />
                   {errMsg("full_name")}
                 </div>
                 <div>
                   <Label>Teléfono</Label>
                   <Input
+                    data-testid="checkout-phone"
                     type="tel"
                     inputMode="numeric"
                     maxLength={10}
@@ -192,7 +193,7 @@ const Checkout = () => {
                 <div><Label>Email</Label><Input value={user?.email ?? ""} disabled className="mt-1.5" /></div>
                 <div className="sm:col-span-2">
                   <Label>Dirección completa</Label>
-                  <Input value={shipping.address} onChange={(e) => setShipping({ ...shipping, address: e.target.value })} placeholder="Calle, número, colonia, ciudad" className="mt-1.5" />
+                  <Input data-testid="checkout-address" value={shipping.address} onChange={(e) => setShipping({ ...shipping, address: e.target.value })} placeholder="Calle, número, colonia, ciudad" className="mt-1.5" />
                   {errMsg("address")}
                 </div>
               </div>
@@ -207,6 +208,7 @@ const Checkout = () => {
                 <div className="sm:col-span-2">
                   <Label>Nombre del titular</Label>
                   <Input
+                    data-testid="checkout-card-name"
                     value={card.name}
                     onChange={(e) => setCard({ ...card, name: e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, "") })}
                     placeholder="Como aparece en la tarjeta"
@@ -217,6 +219,7 @@ const Checkout = () => {
                 <div className="sm:col-span-2">
                   <Label>Número de tarjeta</Label>
                   <Input
+                    data-testid="checkout-card-number"
                     inputMode="numeric"
                     value={card.number}
                     onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
@@ -229,6 +232,7 @@ const Checkout = () => {
                 <div>
                   <Label>Vencimiento</Label>
                   <Input
+                    data-testid="checkout-card-expiry"
                     inputMode="numeric"
                     value={card.expiry}
                     onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
@@ -241,6 +245,7 @@ const Checkout = () => {
                 <div>
                   <Label>CVV</Label>
                   <Input
+                    data-testid="checkout-card-cvv"
                     inputMode="numeric"
                     value={card.cvv}
                     onChange={(e) => setCard({ ...card, cvv: e.target.value.replace(/\D/g, "").slice(0, 4) })}
@@ -274,7 +279,7 @@ const Checkout = () => {
                 <div className="flex justify-between"><span className="text-muted-foreground">Envío</span><span className="tabular-nums">{shippingCost === 0 ? "Gratis" : `$${shippingCost}`}</span></div>
                 <div className="border-t border-border pt-2 flex justify-between text-lg"><span className="font-semibold">Total</span><span className="font-display font-bold text-primary tabular-nums">${total.toFixed(2)}</span></div>
               </div>
-              <Button type="submit" disabled={loading} variant="hero" size="lg" className="w-full mt-6">
+              <Button data-testid="checkout-submit" type="submit" disabled={loading} variant="hero" size="lg" className="w-full mt-6">
                 {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Procesando...</> : "Confirmar pedido"}
               </Button>
             </div>

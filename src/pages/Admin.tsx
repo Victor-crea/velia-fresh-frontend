@@ -124,7 +124,7 @@ const Admin = () => {
       <section className="container py-8">
         <div className="flex gap-2 overflow-x-auto pb-3 mb-6 border-b border-border">
           {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id} data-testid={`admin-tab-${t.id}`} onClick={() => setTab(t.id)}
               className={cn("flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-smooth whitespace-nowrap",
                 tab === t.id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-secondary")}>
               <t.icon className="h-4 w-4" /> {t.label}
@@ -167,7 +167,7 @@ const Admin = () => {
           <div className="animate-fade-in">
             <div className="flex justify-between mb-4">
               <h2 className="font-display text-2xl font-bold">Productos</h2>
-              <Button variant="hero" onClick={openNew}><Plus className="h-4 w-4" /> Nuevo producto</Button>
+              <Button data-testid="admin-new-product" variant="hero" onClick={openNew}><Plus className="h-4 w-4" /> Nuevo producto</Button>
             </div>
             {loading ? <div className="py-12 grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : (
               <div className="bg-card rounded-xl border border-border/60 overflow-hidden shadow-soft">
@@ -184,7 +184,7 @@ const Admin = () => {
                     </thead>
                     <tbody>
                       {products.map((p) => (
-                        <tr key={p.id} className="border-t border-border/50 hover:bg-secondary/30">
+                        <tr key={p.id} data-testid="admin-product-row" data-product-id={p.id} className="border-t border-border/50 hover:bg-secondary/30">
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
                               <img src={getProductImage(p.name, p.image)} alt="" className="h-10 w-10 rounded object-cover" />
@@ -195,8 +195,8 @@ const Admin = () => {
                           <td className="px-4 py-3 tabular-nums font-semibold">${p.price}/{p.unit}</td>
                           <td className="px-4 py-3 tabular-nums">{p.stock} kg</td>
                           <td className="px-4 py-3 text-right">
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteProduct(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                            <Button data-testid={`admin-edit-${p.id}`} variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
+                            <Button data-testid={`admin-delete-${p.id}`} variant="ghost" size="icon" className="text-destructive" onClick={() => deleteProduct(p.id)}><Trash2 className="h-4 w-4" /></Button>
                           </td>
                         </tr>
                       ))}
@@ -276,11 +276,11 @@ const Admin = () => {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing.id ? "Editar producto" : "Nuevo producto"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div><Label>Nombre</Label><Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
-            <div><Label>Descripción</Label><Textarea value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
+            <div><Label>Nombre</Label><Input data-testid="admin-form-name" value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
+            <div><Label>Descripción</Label><Textarea data-testid="admin-form-description" value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Precio</Label><Input type="number" step="0.01" value={editing.price ?? 0} onChange={(e) => setEditing({ ...editing, price: parseFloat(e.target.value) })} /></div>
-              <div><Label>Stock (kg)</Label><Input type="number" step="0.01" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseFloat(e.target.value) })} /></div>
+              <div><Label>Precio</Label><Input data-testid="admin-form-price" type="number" step="0.01" value={editing.price ?? 0} onChange={(e) => setEditing({ ...editing, price: parseFloat(e.target.value) })} /></div>
+              <div><Label>Stock (kg)</Label><Input data-testid="admin-form-stock" type="number" step="0.01" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseFloat(e.target.value) })} /></div>
               <div>
                 <Label>Categoría</Label>
                 <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v as Category })}>
@@ -299,7 +299,7 @@ const Admin = () => {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button variant="hero" onClick={saveProduct} disabled={saving}>
+            <Button data-testid="admin-form-save" variant="hero" onClick={saveProduct} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}
             </Button>
           </DialogFooter>

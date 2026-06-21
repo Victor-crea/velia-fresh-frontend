@@ -10,7 +10,11 @@ export const ProductCard = ({ product }: { product: Product }) => {
   const img = getProductImage(product.name, product.image);
   const outOfStock = product.stock <= 0;
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-soft hover:shadow-elegant transition-smooth border border-border/50">
+    <article
+      data-testid="product-card"
+      data-product-id={product.id}
+      className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-soft hover:shadow-elegant transition-smooth border border-border/50"
+    >
       <div className="relative aspect-square overflow-hidden bg-secondary">
         <img
           src={img}
@@ -30,14 +34,19 @@ export const ProductCard = ({ product }: { product: Product }) => {
         </Badge>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="font-display text-xl font-semibold leading-tight">{product.name}</h3>
+        <h3 data-testid="product-name" className="font-display text-xl font-semibold leading-tight">{product.name}</h3>
         <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2 flex-1">{product.description}</p>
         <div className="mt-4 flex items-end justify-between">
           <div>
-            <span className="font-display text-2xl font-bold text-primary">${product.price}</span>
+            <span data-testid="product-price" className="font-display text-2xl font-bold text-primary">${product.price}</span>
             <span className="text-sm text-muted-foreground">/{product.unit}</span>
           </div>
-          <Button size="sm" onClick={() => addItem(product)} disabled={outOfStock}>
+          <Button
+            size="sm"
+            onClick={() => addItem(product)}
+            disabled={outOfStock}
+            data-testid={`add-to-cart-${product.id}`}
+          >
             <ShoppingCart className="h-4 w-4" />
             {outOfStock ? "Agotado" : "Agregar"}
           </Button>

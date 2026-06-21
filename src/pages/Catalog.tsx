@@ -46,6 +46,7 @@ const Catalog = () => {
           <div className="mt-8 max-w-md mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              data-testid="catalog-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar cortes..."
