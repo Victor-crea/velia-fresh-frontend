@@ -92,6 +92,7 @@ const Auth = () => {
               <button
                 key={t}
                 type="button"
+                data-testid={`auth-tab-${t}`}
                 onClick={() => setTab(t)}
                 className={cn(
                   "py-2.5 text-sm font-medium rounded-md transition-smooth",
@@ -107,18 +108,18 @@ const Auth = () => {
             {tab === "register" && (
               <div>
                 <Label>Nombre completo</Label>
-                <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="María García" className="mt-1.5" />
+                <Input data-testid="auth-fullname" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="María García" className="mt-1.5" />
               </div>
             )}
             <div>
               <Label>Email</Label>
-              <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" className="mt-1.5" />
+              <Input data-testid="auth-email" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" className="mt-1.5" />
             </div>
             <div>
               <Label>Contraseña</Label>
-              <Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1.5" />
+              <Input data-testid="auth-password" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1.5" />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+            <Button data-testid="auth-submit" type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Procesando...</> : (tab === "login" ? "Ingresar" : "Crear cuenta")}
             </Button>
             <p className="text-xs text-center text-muted-foreground">

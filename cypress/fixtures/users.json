@@ -1,0 +1,16 @@
+{
+  "cliente": {
+    "email": "cliente.e2e@example.com",
+    "password": "Cypress123!",
+    "fullName": "Cliente E2E"
+  },
+  "admin": {
+    "email": "admin.e2e@example.com",
+    "password": "Cypress123!",
+    "fullName": "Admin E2E"
+  },
+  "invalido": {
+    "email": "no-existe@example.com",
+    "password": "wrongpass"
+  }
+}

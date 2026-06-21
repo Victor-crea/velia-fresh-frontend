@@ -46,6 +46,7 @@ const Catalog = () => {
           <div className="mt-8 max-w-md mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              data-testid="catalog-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar cortes..."
@@ -60,6 +61,7 @@ const Catalog = () => {
           {categories.map((c) => (
             <button
               key={c.name}
+              data-testid={`category-${c.name}`}
               onClick={() => setActive(c.name)}
               className={cn(
                 "shrink-0 px-5 py-2.5 rounded-full text-sm font-medium border transition-smooth",
@@ -75,20 +77,20 @@ const Catalog = () => {
         </div>
 
         {loading ? (
-          <div className="py-24 grid place-items-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
+          <div data-testid="catalog-loading" className="py-24 grid place-items-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
         ) : error ? (
-          <div className="py-24 text-center">
+          <div data-testid="catalog-error" className="py-24 text-center">
             <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-3" />
             <p className="text-muted-foreground">{error}</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-24 text-center">
+          <div data-testid="catalog-empty" className="py-24 text-center">
             <PackageOpen className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
             <h3 className="font-display text-2xl font-semibold">Sin resultados</h3>
             <p className="text-muted-foreground mt-2">Intenta con otra búsqueda o categoría.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
+          <div data-testid="catalog-grid" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
             {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         )}

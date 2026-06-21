@@ -44,7 +44,7 @@ const Cart = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {items.map(({ product, quantity }) => (
-              <div key={product.id} className="flex gap-4 p-4 bg-card rounded-xl border border-border/60 shadow-soft animate-fade-in">
+              <div key={product.id} data-testid="cart-item" data-product-id={product.id} className="flex gap-4 p-4 bg-card rounded-xl border border-border/60 shadow-soft animate-fade-in">
                 <img src={getProductImage(product.name, product.image)} alt={product.name} loading="lazy" className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover" />
                 <div className="flex-1 flex flex-col">
                   <div className="flex justify-between gap-2">
@@ -52,7 +52,7 @@ const Cart = () => {
                       <h3 className="font-display text-lg font-semibold leading-tight">{product.name}</h3>
                       <p className="text-xs text-muted-foreground">{product.category} · ${product.price}/{product.unit}</p>
                     </div>
-                    <button onClick={() => removeItem(product.id)} className="text-muted-foreground hover:text-destructive transition-smooth">
+                    <button data-testid={`cart-remove-${product.id}`} onClick={() => removeItem(product.id)} className="text-muted-foreground hover:text-destructive transition-smooth">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -90,10 +90,10 @@ const Cart = () => {
                 )}
                 <div className="border-t border-border pt-3 flex justify-between text-lg">
                   <span className="font-semibold">Total</span>
-                  <span className="font-display font-bold text-primary tabular-nums">${total.toFixed(2)}</span>
+                  <span data-testid="cart-total" className="font-display font-bold text-primary tabular-nums">${total.toFixed(2)}</span>
                 </div>
               </div>
-              <Link to="/checkout" className="block mt-6">
+              <Link to="/checkout" className="block mt-6" data-testid="cart-checkout">
                 <Button variant="hero" size="lg" className="w-full">
                   Proceder al pago <ArrowRight className="h-4 w-4" />
                 </Button>
