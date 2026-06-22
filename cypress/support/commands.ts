@@ -39,9 +39,11 @@ Cypress.Commands.add("loginAs", (role: "cliente" | "admin") => {
       : Cypress.env("TEST_USER_PASSWORD");
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !email || !password) {
+    const prefix = role === "admin" ? "TEST_ADMIN" : "TEST_USER";
     throw new Error(
-      `Faltan variables de entorno para loginAs(${role}). ` +
-        `Define SUPABASE_URL, SUPABASE_ANON_KEY, TEST_${role.toUpperCase()}_EMAIL y _PASSWORD.`
+      `Faltan variables de entorno para loginAs("${role}"). ` +
+        `Define VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, ${prefix}_EMAIL y ${prefix}_PASSWORD ` +
+        `en tu archivo .env (o cypress.env) en la raíz del proyecto.`
     );
   }
 
