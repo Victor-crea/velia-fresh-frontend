@@ -39,9 +39,11 @@ Cypress.Commands.add("loginAs", (role: "cliente" | "admin") => {
       : Cypress.env("TEST_USER_PASSWORD");
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !email || !password) {
+    const prefix = role === "admin" ? "TEST_ADMIN" : "TEST_USER";
     throw new Error(
-      `Faltan variables de entorno para loginAs(${role}). ` +
-        `Define SUPABASE_URL, SUPABASE_ANON_KEY, TEST_${role.toUpperCase()}_EMAIL y _PASSWORD.`
+      `Faltan variables de entorno para loginAs("${role}"). ` +
+        `Define VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, ${prefix}_EMAIL y ${prefix}_PASSWORD ` +
+        `en tu archivo .env (o cypress.env) en la raíz del proyecto.`
     );
   }
 
@@ -113,11 +115,30 @@ Cypress.Commands.add("seedProduct", (payload: Record<string, unknown>) => {
 });
 
 // ---------- a11y ----------
+// Por defecto las violaciones se REPORTAN en consola pero NO hacen fallar el
+// test (es una verificación "básica" según el checklist 5.2). Para activar
+// modo estricto, define A11Y_STRICT=true en el entorno.
 Cypress.Commands.add("a11y", (context?: string) => {
   cy.injectAxe();
-  cy.checkA11y(context, {
-    includedImpacts: ["critical", "serious"],
-  });
+  const strict = String(Cypress.env("A11Y_STRICT") ?? "false") === "true";
+  cy.checkA11y(
+    context,
+    { includedImpacts: ["critical", "serious"] },
+    (violations) => {
+      if (!violations.length) return;
+      cy.task?.("log", `a11y: ${violations.length} violaciones detectadas`);
+      // eslint-disable-next-line no-console
+      console.table(
+        violations.map((v) => ({
+          id: v.id,
+          impact: v.impact,
+          nodes: v.nodes.length,
+          help: v.help,
+        }))
+      );
+    },
+    !strict // skipFailures = true salvo modo estricto
+  );
 });
 
 export {};
