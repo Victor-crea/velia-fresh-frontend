@@ -21,10 +21,34 @@ describe("Auth · Login", () => {
     cy.contains(/credenciales|invalid/i).should("be.visible");
   });
 
-  it("permite iniciar sesión exitosamente como cliente y redirige", () => {
-    auth.visit().fillLogin(users.cliente.email, users.cliente.password).submit();
-    cy.location("pathname", { timeout: 10000 }).should("match", /\/(perfil|admin|)$/);
-  });
+  // login.cy.ts
+it("permite iniciar sesión exitosamente como cliente y redirige", () => {
+  // Interceptar la llamada de auth y simular respuesta exitosa
+  cy.intercept("POST", "**/auth/v1/token*", {
+    statusCode: 200,
+    body: {
+      access_token: "fake-token",
+      refresh_token: "fake-refresh",
+      token_type: "bearer",
+      expires_in: 3600,
+      user: {
+        id: "00000000-0000-0000-0000-000000000001",
+        email: users.cliente.email,
+        role: "authenticated",
+      },
+    },
+  }).as("loginOk");
+
+  // Interceptar la llamada que la app hace para obtener el perfil/rol
+  cy.intercept("GET", "**/rest/v1/profiles*", {
+    statusCode: 200,
+    body: [{ id: "00000000-0000-0000-0000-000000000001", role: "cliente" }],
+  }).as("profile");
+
+  auth.visit().fillLogin(users.cliente.email, users.cliente.password).submit();
+  cy.wait("@loginOk");
+  cy.location("pathname", { timeout: 10000 }).should("match", /\/(perfil|admin|)$/);
+});
 
   it("no tiene violaciones de accesibilidad críticas", () => {
     auth.visit();

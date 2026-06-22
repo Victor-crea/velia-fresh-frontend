@@ -39,6 +39,12 @@ export default defineConfig({
     supportFile: "cypress/support/e2e.ts",
     fixturesFolder: "cypress/fixtures",
     setupNodeEvents(on, config) {
+      on('task', {
+        log(message: unknown) {
+          console.log(message)
+          return null
+        },
+      })
       config.env = {
         ...config.env,
         SUPABASE_URL: process.env.VITE_SUPABASE_URL ?? config.env.SUPABASE_URL,
@@ -67,3 +73,4 @@ export default defineConfig({
   viewportHeight: 800,
   defaultCommandTimeout: 8000,
 });
+

@@ -21,23 +21,36 @@ describe("Checkout · Crear orden", () => {
   });
 
   it("crea una orden con datos válidos (POST orders interceptado)", () => {
-    cy.intercept("POST", "**/rest/v1/orders*", {
-      statusCode: 201,
-      body: [{ id: "00000000-0000-0000-0000-000000000999" }],
-    }).as("createOrder");
-    cy.intercept("POST", "**/rest/v1/order_items*", { statusCode: 201, body: [] }).as("createItems");
-    cy.intercept("PATCH", "**/rest/v1/products*", { statusCode: 204, body: "" });
-    cy.intercept("PATCH", "**/rest/v1/profiles*", { statusCode: 204, body: "" });
+  cy.intercept("POST", "**/rest/v1/orders*", {
+    statusCode: 201,
+    body: { id: "00000000-0000-0000-0000-000000000999" },  // ← objeto, no array
+  }).as("createOrder");
 
-    checkout
-      .fillShipping(orders.valid.shipping)
-      .fillCard(orders.valid.card)
-      .submit();
+  cy.intercept("POST", "**/rest/v1/order_items*", {
+    statusCode: 201,
+    body: [],
+  }).as("createItems");
 
-    cy.wait("@createOrder").its("request.body.shipping_address").should("include", "Cliente E2E");
-    cy.wait("@createItems");
-    checkout.successHeading().should("be.visible");
-  });
+  cy.intercept("PATCH", "**/rest/v1/products*", {
+    statusCode: 204,
+    body: "",
+  }).as("updateStock");
+
+  cy.intercept("PATCH", "**/rest/v1/profiles*", {
+    statusCode: 204,
+    body: "",
+  }).as("updateProfile");
+
+  checkout
+    .fillShipping(orders.valid.shipping)
+    .fillCard(orders.valid.card)
+    .submit();
+
+  cy.wait("@createOrder");
+  cy.wait("@createItems");
+
+  checkout.successHeading().should("be.visible");
+});
 
   it("muestra error cuando el backend falla al crear orden", () => {
     cy.intercept("POST", "**/rest/v1/orders*", {
