@@ -3,11 +3,14 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 import { connectMongo } from "./lib/mongoClient";
 import { logger, morganStream } from "./lib/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requestLogger } from "./middlewares/requestLogger";
+
 
 import authRoutes from "./routes/auth.routes";
 import productsRoutes from "./routes/products.routes";
@@ -31,8 +34,45 @@ app.use(cors({ origin: ORIGIN, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("combined", { stream: morganStream }));
 app.use(requestLogger);
+// Versión leída de package.json al iniciar (evita I/O por request).
+let API_VERSION = "0.0.0";
+try {
+  const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf8"));
+  API_VERSION = pkg.version ?? API_VERSION;
+} catch (e) {
+  logger.warn("no se pudo leer package.json", { message: (e as Error)?.message });
+}
 
 app.get("/health", (_req, res) => res.json({ success: true, data: { status: "ok" } }));
+
+// Endpoint raíz informativo (índice del API).
+app.get("/", (_req, res) => {
+  const endpoints = [
+    "/api/auth",
+    "/api/products",
+    "/api/orders",
+    "/api/users",
+    "/api/categories",
+    "/api/shipping",
+    "/api/promotions",
+    "/api/reviews",
+    "/api/analytics",
+    "/api/notifications",
+    "/api/dashboard",
+  ];
+  if (process.env.ENABLE_TEST_ENDPOINTS === "true") endpoints.push("/api/testing");
+  res.json({
+    success: true,
+    data: {
+      name: "evelia-backend",
+      version: API_VERSION,
+      status: "ok",
+      healthUrl: "/health",
+      endpoints,
+    },
+  });
+});
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
