@@ -1,13 +1,13 @@
 {
   "cliente": {
     "email": "cliente.e2e@example.com",
-    "password": "Cypress123!",
+    "password": "Cypress123!*",
     "fullName": "Cliente E2E"
   },
   "admin": {
-    "email": "admin.e2e@example.com",
-    "password": "Cypress123!",
-    "fullName": "Admin E2E"
+    "email": "victormarquezmares.30@gmail.com",
+    "password": "puchongon1A*",
+    "fullName": "Victor Marquez"
   },
   "invalido": {
     "email": "no-existe@example.com",
