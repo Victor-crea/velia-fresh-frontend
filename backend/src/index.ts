@@ -3,11 +3,14 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 import { connectMongo } from "./lib/mongoClient";
 import { logger, morganStream } from "./lib/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requestLogger } from "./middlewares/requestLogger";
+
 
 import authRoutes from "./routes/auth.routes";
 import productsRoutes from "./routes/products.routes";
